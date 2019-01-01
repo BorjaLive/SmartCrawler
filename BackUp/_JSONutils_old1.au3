@@ -8,18 +8,18 @@ Global $trash = False
 
 Func __InternetGet($url)
 	$text = BinaryToString(InetRead($url))
-	If $strict_coma Then $text = StringReplace($text, '\"', "'")
+	If $strict_coma Then $text = StringReplace($text,'\"',"'")
 	Return ___StringDecode($text)
-EndFunc   ;==>__InternetGet
+EndFunc
 Func __getJSON()
 	Return __getArray()
-EndFunc   ;==>__getJSON
+EndFunc
 
 Func __JSONparse($json)
 	$data = __getArray()
 
 	;If StringMid($json,1,8) = '"source"' Then $trash = True
-	If $trash Then MsgBox(0, "", $json)
+	If $trash Then MsgBox(0,"",$json)
 	$partes = ___Split($json)
 	;If $trash Then _ArrayDisplay($partes)
 
@@ -33,18 +33,18 @@ Func __JSONparse($json)
 			;If $trash Then _ArrayDisplay($idens)
 			If $idens[0] <> 2 Then Return SetError(1)
 
-			$data = __add($data, $idens[1])
+			$data = __add($data,$idens[1])
 			$idens = __JSONparse($idens[2])
 			If @error Then Return SetError(@error)
-			$data = __addEx($data, $idens)
+			$data = __addEx($data,$idens)
 		Else
-			$data = __addEx($data, __JSONparse($json))
+			$data = __addEx($data,__JSONparse($json))
 		EndIf
 	Else
 		For $i = 1 To $partes[0]
 			$tmp = __JSONparse($partes[$i])
 			If @error Then Return SetError(@error)
-			$data = __addEx($data, $tmp)
+			$data = __addEx($data,$tmp)
 		Next
 	EndIf
 
@@ -53,35 +53,35 @@ Func __JSONparse($json)
 	;tmpRec($data)
 
 	Return $data
-EndFunc   ;==>__JSONparse
+EndFunc
 Func __JSONgetElement($data, $identifier)
-	$identifier = '"' & $identifier & '"'
+	$identifier = '"'&$identifier&'"'
 	If $data[0] = 2 And (Not IsArray($data[1])) And $data[1] = $identifier Then Return $data[2]
 	For $i = 1 To $data[0]
 		$element = $data[$i]
-		If (Not IsArray($element)) Or $element[0] <> 2 Then ContinueLoop
+		If (Not IsArray($element)) or $element[0] <> 2 Then ContinueLoop
 		;If $identifier = "media" Then MsgBox(0,"CHECK",$element[1])
 		If $element[1] = $identifier Then Return $element[2]
 	Next
 	Return False
-EndFunc   ;==>__JSONgetElement
-Func __JSONadd($json, $identifier, $data)
+EndFunc
+Func __JSONadd($json,$identifier,$data)
 	$tmp = __getArray()
-	$tmp = __add($tmp, $identifier)
-	$tmp = __add($tmp, $data)
-	Return __add($json, $tmp)
-EndFunc   ;==>__JSONadd
+	$tmp = __add($tmp,$identifier)
+	$tmp = __add($tmp,$data)
+	Return __add($json,$tmp)
+EndFunc
 
-Func __addEx($array, $element)
+Func __addEx($array,$element)
 	;Bypass
 	;Return __add($array,$element)
 
 	If IsArray($element) And $element[0] = 1 Then
-		Return __add($array, $element[1])
+		Return __add($array,$element[1])
 	Else
-		Return __add($array, $element)
+		Return __add($array,$element)
 	EndIf
-EndFunc   ;==>__addEx
+EndFunc
 
 
 
@@ -92,19 +92,19 @@ Func ___IdenSplit($text)
 
 	$interiores = ____obtenerInteriores($text)
 	For $i = 1 To StringLen($text)
-		$c = StringMid($text, $i, 1)
+		$c = StringMid($text,$i,1)
 		If (Not $interiores[$i]) And $c = ":" Then
-			$partes = __add($partes, $tmp)
+			$partes = __add($partes,$tmp)
 			$tmp = ""
 		Else
 			$tmp &= $c
 		EndIf
 	Next
 
-	If $tmp Then $partes = __add($partes, $tmp)
+	If $tmp Then $partes = __add($partes,$tmp)
 
 	Return $partes
-EndFunc   ;==>___IdenSplit
+EndFunc
 Func ___Split($text)
 	$levelA = 0
 	$levelB = 0
@@ -112,59 +112,59 @@ Func ___Split($text)
 	$partes = __getArray()
 	$tmp = ""
 
-	If (StringMid($text, 1, 1) = "{" And StringMid($text, StringLen($text), 1) = "}") Or (StringMid($text, 1, 1) = "[" And StringMid($text, StringLen($text), 1) = "]") Then
-		$text = StringTrimLeft(StringTrimRight($text, 1), 1)
+	If (StringMid($text,1,1) = "{" And StringMid($text,StringLen($text),1) = "}") or (StringMid($text,1,1) = "[" And StringMid($text,StringLen($text),1) = "]") Then
+		$text = StringTrimLeft(StringTrimRight($text,1),1)
 		For $i = 1 To StringLen($text)
-			$c = StringMid($text, $i, 1)
+			$c = StringMid($text,$i,1)
 			If $c = "[" Then $levelA += 1
 			If $c = "]" Then $levelA -= 1
 			If $c = "{" Then $levelB += 1
 			If $c = "}" Then $levelB -= 1
 			If $c = '"' Then $levelC = Not $levelC
 			If $c = "," And $levelA = 0 And $levelB = 0 And $levelC = False Then
-				$partes = __add($partes, $tmp)
+				$partes = __add($partes,$tmp)
 				$tmp = ""
 			Else
 				$tmp &= $c
 			EndIf
 		Next
-		If $tmp Then $partes = __add($partes, $tmp)
+		If $tmp Then $partes = __add($partes,$tmp)
 	Else
-		$partes = __add($partes, $text)
+		$partes = __add($partes,$text)
 	EndIf
 
 	;_ArrayDisplay($partes)
 	Return $partes
-EndFunc   ;==>___Split
+EndFunc
 
 Func ___isAsoc($text)
 	$text = ____eliminarInteriores($text)
 	;If $trash Then MsgBox(0,"Sin interiores",$text)
 	$count = 0
 	For $i = 1 To StringLen($text)
-		If StringMid($text, $i, 1) = ":" Then $count += 1
+		If StringMid($text,$i,1) = ":" Then $count += 1
 	Next
 	Return $count = 1
-EndFunc   ;==>___isAsoc
+EndFunc
 Func ___isElement($text)
 	$text = ____eliminarFlechas($text)
 
 	$level = False
 	For $i = 1 To StringLen($text)
-		$c = StringMid($text, $i, 1)
+		$c = StringMid($text,$i,1)
 		If $c = '"' Then
 			$level = Not $level
 		Else
-			If $level = False And ($c = "{" Or $c = "}" Or $c = "[" Or $c = "]" Or $c = "," Or $c = ":") Then Return False
+			If $level = False And ($c="{" or $c="}" or $c="[" or $c="]" or $c="," or $c=":") Then Return False
 		EndIf
 	Next
 	;If $trash Then MsgBox(0,"Es elemento",$text)
 	Return True
-EndFunc   ;==>___isElement
-Func ___isString($text) ; Deprecated
-	If StringMid($text, 1, 1) = '"' And StringMid($text, StringLen($text), 1) = '"' Then
-		$text = StringTrimLeft(StringTrimRight($text, 1), 1)
-		If StringInStr($text, '"') = 0 Then
+EndFunc
+Func ___isString($text); Deprecated
+	If StringMid($text,1,1) = '"' And StringMid($text,StringLen($text),1) = '"' Then
+		$text = StringTrimLeft(StringTrimRight($text,1),1)
+		If StringInStr($text,'"') = 0 Then
 			Return $text
 		Else
 			Return SetError(1)
@@ -172,7 +172,7 @@ Func ___isString($text) ; Deprecated
 	Else
 		Return SetError(1)
 	EndIf
-EndFunc   ;==>___isString
+EndFunc
 
 Func ____eliminarFlechas($text)
 	$levelFL = False
@@ -194,7 +194,7 @@ Func ____eliminarFlechas($text)
 	Next
 
 	Return $text
-EndFunc   ;==>____eliminarFlechas
+EndFunc
 Func ____eliminarInteriores($text)
 	$levelSC = False
 	$levelDC = False
@@ -206,7 +206,7 @@ Func ____eliminarInteriores($text)
 	For $j = 1 To StringLen($text)
 		$del = True
 		$c = StringMid($text, $j, 1)
-		If $levelSC Or $levelDC Or $levelFL Or $levelPA > 0 Or $levelCO > 0 Or $levelET > 0 Then
+		If $levelSC Or $levelDC or $levelFL Or $levelPA > 0 Or $levelCO > 0 or $levelET > 0 Then
 			$text = StringReplace($text, StringMid($text, $j), StringTrimLeft(StringMid($text, $j), 1))
 			$del = False
 			$j -= 1
@@ -216,7 +216,7 @@ Func ____eliminarInteriores($text)
 		If $c = '<' Then $levelFL = True
 		If $c = '>' Then
 			$levelFL = False
-			$levelET = $levelET = 0 ? 1 : 0 ;Esto hay que mejorarlo
+			$levelET = $levelET=0?1:0;Esto hay que mejorarlo
 		EndIf
 		If $c = "{" Then $levelPA += 1
 		If $c = "}" Then $levelPA -= 1
@@ -229,7 +229,7 @@ Func ____eliminarInteriores($text)
 	Next
 	;MsgBox(0,"Sale",$text)
 	Return $text
-EndFunc   ;==>____eliminarInteriores
+EndFunc
 Func ____obtenerInteriores($text)
 	$lista = __getArray()
 
@@ -252,14 +252,14 @@ Func ____obtenerInteriores($text)
 		If $c = '<' Then $levelFL = True
 		If $c = '>' Then
 			$levelFL = False
-			$levelET = $levelET = 0 ? 1 : 0 ;Esto hay que mejorarlo
+			$levelET = $levelET=0?1:0;Esto hay que mejorarlo
 		EndIf
 		If $c = "{" Then $levelPA += 1
 		If $c = "}" Then $levelPA -= 1
 		If $c = "[" Then $levelCO += 1
 		If $c = "]" Then $levelCO -= 1
-		If $del Then $lista = __add($lista, $levelSC Or $levelDC Or $levelFL Or $levelPA > 0 Or $levelCO > 0 Or $levelET > 0)
+		If $del Then $lista = __add($lista, $levelSC Or $levelDC or $levelFL Or $levelPA > 0 Or $levelCO > 0 or $levelET > 0)
 	Next
 	;_ArrayDisplay($lista)
 	Return $lista
-EndFunc   ;==>____obtenerInteriores
+EndFunc

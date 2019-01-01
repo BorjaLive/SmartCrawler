@@ -10,12 +10,11 @@ function getJsonUser($user,$num_tweets,$starter){
         ini_set('display_errors', 1);
         require_once('TwitterAPIExchange.php');
  
-        /** Set access tokens here - see: https://dev.twitter.com/apps/ **/
-        $settings = array(
-            'consumer_key' => "LjFhoU32yQx3aScxwFWGT1rDU",
-            'consumer_secret' => "ZSMBtH2aG8nQeVNLYqr5vWD8ZOVNVbp2OYWGeiKlYNPIyXNIec",
-            'oauth_access_token' => "1491086923-9CPIaHKifoD6bbNR4bujdBIkHIFvOQDW7Mv2FuM",
-            'oauth_access_token_secret' => "fXbSIASe9oXWT1x5c8C3XLLSFvBToz2Iqv7tYxGxYizcS"
+        $settings = array(	//¿Buscas mi API KEY? Ve a robarla al servidor, no está aquí.
+            'consumer_key' => "", 
+            'consumer_secret' => "",
+            'oauth_access_token' => "",
+            'oauth_access_token_secret' => ""
         );
        
         $url = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
