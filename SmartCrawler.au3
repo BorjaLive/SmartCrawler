@@ -5,7 +5,7 @@
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=A mass-downloader for Social media and Image Boards
-#AutoIt3Wrapper_Res_Fileversion=0.1.2.1
+#AutoIt3Wrapper_Res_Fileversion=0.1.2.2
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_ProductVersion=0.1.2
 #AutoIt3Wrapper_Res_CompanyName=Liveployers
@@ -32,22 +32,23 @@ Global $DOWNLOAD_FOLDER
 Opt("GUIOnEventMode", 1)
 
 #Region GUI
-$GUI = GUICreate("SmartCrawler", 370, 335)
+$GUI = GUICreate("SmartCrawler", 370, 365)
 GUISetFont(12, 600)
-GUICtrlCreateTab(10, 10, 350, 230)
+GUICtrlCreateTab(10, 10, 350, 260)
 
-GUICtrlCreateLabel("Elementos encontrados: ", 25, 250)
-$GUI_total = GUICtrlCreateInput("", 225, 250, 50, 20, BitOR($ES_READONLY, $ES_RIGHT))
-$GUI_progress = GUICtrlCreateProgress(30, 285, 310, 35)
+GUICtrlCreateLabel("Elementos encontrados: ", 25, 280)
+$GUI_total = GUICtrlCreateInput("", 225, 280, 50, 20, BitOR($ES_READONLY, $ES_RIGHT))
+$GUI_progress = GUICtrlCreateProgress(30, 315, 310, 35)
 
 GUICtrlCreateTabItem("Twitter")
 GUICtrlCreateLabel("Nombre de usuario", 30, 50)
 $Twitter_user = GUICtrlCreateInput("Dev_Voxy", 25, 70, 200, 25)
-$Twitter_all = GUICtrlCreateCheckbox("Descargar todo", 25, 110)
-$Twitter_experimental = GUICtrlCreateCheckbox("Detección rápida (experimental)", 25, 140)
-$Twitter_fast = GUICtrlCreateCheckbox("Seleccionar solo la primera tanda", 25, 170)
-$Twitter_download = GUICtrlCreateButton("Iniciar", 135, 200, 100, 30)
-$Twitter_reload = GUICtrlCreateButton("Reiniciar", 250, 200, 100, 30)
+$Twitter_all = GUICtrlCreateCheckbox("Descargar sin preguntar", 25, 110)
+$Twitter_noFilter = GUICtrlCreateCheckbox("Detectar absolutamente todo", 25, 140)
+$Twitter_experimental = GUICtrlCreateCheckbox("Detección rápida (experimental)", 25, 170)
+$Twitter_fast = GUICtrlCreateCheckbox("Seleccionar solo la primera tanda", 25, 200)
+$Twitter_download = GUICtrlCreateButton("Iniciar", 135, 230, 100, 30)
+$Twitter_reload = GUICtrlCreateButton("Reiniciar", 250, 230, 100, 30)
 
 GUICtrlCreateTabItem("DeviantART")
 GUICtrlCreateLabel("Sigue soñando, creo que nunca" & @CRLF & "actualizare esto.", 30, 80)
@@ -76,7 +77,7 @@ WEnd
 
 Func Twitter()
 	GUICtrlSetState($Twitter_download, $GUI_DISABLE)
-	$img = _getAllTwits(GUICtrlRead($Twitter_user), GUICtrlRead($Twitter_experimental) = $GUI_CHECKED, GUICtrlRead($Twitter_fast) = $GUI_CHECKED, $GUI_total, $GUI_progress)
+	$img = _getAllTwits(GUICtrlRead($Twitter_user), GUICtrlRead($Twitter_experimental) = $GUI_CHECKED, GUICtrlRead($Twitter_fast) = $GUI_CHECKED, GUICtrlRead($Twitter_noFilter) = $GUI_CHECKED, $GUI_total, $GUI_progress)
 	$DOWNLOAD_FOLDER = @DesktopDir & "\" & GUICtrlRead($Twitter_user)
 	If GUICtrlRead($Twitter_all) = $GUI_CHECKED Then
 		_Download($img, $GUI_progress)
@@ -90,9 +91,13 @@ EndFunc   ;==>salir
 
 
 #Region UDF Crawler
-Func _getAllTwits($user, $experimental = False, $fast = False, $GUI_count = False, $GUI_bar = False)
+Func _getAllTwits($user, $experimental = False, $fast = False, $noFilter = False, $GUI_count = False, $GUI_bar = False)
 	If $GUI_count Then GUICtrlSetData($GUI_count, "0")
 	If $GUI_bar Then GUICtrlSetData($GUI_bar, 0)
+
+	;Generar configuracion
+	$parameters = ""
+	If $noFilter Then $parameters &= "[exclude_replies=false[include_rts=true"
 
 	$img = __getArray()
 
@@ -101,9 +106,9 @@ Func _getAllTwits($user, $experimental = False, $fast = False, $GUI_count = Fals
 	$percent_joke = 0
 	Do
 		If $experimental Then
-			$data = __getTwitsFast($user, $next)
+			$data = __getTwitsFast($user, $next, $parameters)
 		Else
-			$data = __getTwits($user, $next)
+			$data = __getTwits($user, $next, $parameters)
 		EndIf
 		;_ArrayDisplay($data)
 		If $data = False Then
@@ -130,8 +135,8 @@ Func _getAllTwits($user, $experimental = False, $fast = False, $GUI_count = Fals
 	If $GUI_bar Then GUICtrlSetData($GUI_bar, 100)
 	Return $img
 EndFunc   ;==>_getAllTwits
-Func __getTwits($user, $starter = "")
-	$data = __JSONparse(__InternetGet($SERVER_PATH & "?user=" & $user & "&num=" & $TANDA_SIZE & "&start=" & ($starter ? $starter : "START")))
+Func __getTwits($user, $starter = "", $parameters = "")
+	$data = __JSONparse(__InternetGet($SERVER_PATH & "?user=" & $user & "&num=" & $TANDA_SIZE & "&start=" & ($starter ? $starter : "START") & "&params=" & ($parameters=""?"NONE":$parameters)))
 
 	$array = __getArray()
 	If $data[0] = 0 Then Return False
@@ -153,8 +158,8 @@ Func __getTwits($user, $starter = "")
 
 	Return $array
 EndFunc   ;==>__getTwits
-Func __getTwitsFast($user, $starter = "")
-	$json = __InternetGet($SERVER_PATH & "?user=" & $user & "&num=" & $TANDA_SIZE & "&start=" & ($starter ? $starter : "START"))
+Func __getTwitsFast($user, $starter = "", $parameters = "")
+	$json = __InternetGet($SERVER_PATH & "?user=" & $user & "&num=" & $TANDA_SIZE & "&start=" & ($starter ? $starter : "START") & "&params=" & ($parameters=""?"NONE":$parameters))
 	$data = __getArray()
 
 	;Obtener la ultima ID
