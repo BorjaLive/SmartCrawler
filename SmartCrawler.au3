@@ -5,7 +5,7 @@
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=A mass-downloader for Social media and Image Boards
-#AutoIt3Wrapper_Res_Fileversion=0.1.2.2
+#AutoIt3Wrapper_Res_Fileversion=0.1.2.3
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_ProductVersion=0.1.2
 #AutoIt3Wrapper_Res_CompanyName=Liveployers
@@ -20,7 +20,7 @@
 #include <GUIConstants.au3>
 #include <GUIConstantsEx.au3>
 
-Const $SERVER_PATH = "http://casabore.ddns.net:8003/search.php"
+Const $SERVER_PATH = "https://smartcrawler.b0ve.com/search.php"
 Const $TANDA_SIZE = 100
 Const $LOCAL_SERVER_PORT = 8003
 Global $WEB_SELECTED_ITEMS
@@ -42,7 +42,7 @@ $GUI_progress = GUICtrlCreateProgress(30, 315, 310, 35)
 
 GUICtrlCreateTabItem("Twitter")
 GUICtrlCreateLabel("Nombre de usuario", 30, 50)
-$Twitter_user = GUICtrlCreateInput("Dev_Voxy", 25, 70, 200, 25)
+$Twitter_user = GUICtrlCreateInput("OhasiArt", 25, 70, 200, 25)
 $Twitter_all = GUICtrlCreateCheckbox("Descargar sin preguntar", 25, 110)
 $Twitter_noFilter = GUICtrlCreateCheckbox("Detectar absolutamente todo", 25, 140)
 $Twitter_experimental = GUICtrlCreateCheckbox("Detección rápida (experimental)", 25, 170)
@@ -50,9 +50,10 @@ $Twitter_fast = GUICtrlCreateCheckbox("Seleccionar solo la primera tanda", 25, 2
 $Twitter_download = GUICtrlCreateButton("Iniciar", 135, 230, 100, 30)
 $Twitter_reload = GUICtrlCreateButton("Reiniciar", 250, 230, 100, 30)
 
+GUICtrlSetState($Twitter_experimental, $GUI_CHECKED)
+
 GUICtrlCreateTabItem("DeviantART")
 GUICtrlCreateLabel("Sigue soñando, creo que nunca" & @CRLF & "actualizare esto.", 30, 80)
-
 
 GUISetOnEvent($GUI_EVENT_CLOSE, "salir")
 GUICtrlSetOnEvent($Twitter_reload, "_WEBserverRestart")
@@ -179,6 +180,11 @@ EndFunc   ;==>__getTwitsFast
 #EndRegion UDF Crawler
 #Region WEB server
 Func _WEBselect($list, $GUI_bar = False)
+	If $list[0] == 0 Then
+		MsgBox(0, "Sin elementos", "No se han encontrado elementos")
+		GUICtrlSetState($Twitter_download, $GUI_ENABLE)
+		Return
+	EndIf
 	$WEB_SELECTED_ITEMS = __getArray()
 	$WEB_SELECTED_JSON = __getJSON()
 	$WEB_PROGRESS_BAR = $GUI_bar

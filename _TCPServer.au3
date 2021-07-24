@@ -254,5 +254,5 @@ Func __TCPServer_Recv()
 EndFunc   ;==>__TCPServer_Recv
 
 Func __TCPServer_Log($sMsg)
-	ConsoleWrite(@CRLF & @MIN & ":" & @SEC & " > " & $sMsg)
+	;ConsoleWrite(@CRLF & @MIN & ":" & @SEC & " > " & $sMsg)
 EndFunc   ;==>__TCPServer_Log

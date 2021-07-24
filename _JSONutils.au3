@@ -9,6 +9,7 @@ Global $trash = False
 Func __InternetGet($url)
 	$text = BinaryToString(InetRead($url))
 	If $strict_coma Then $text = StringReplace($text, '\"', "'")
+	;ConsoleWrite("DECODED: "&___StringDecode($text)&" :DECODED"&@CRLF)
 	Return ___StringDecode($text)
 EndFunc   ;==>__InternetGet
 Func __getJSON()
